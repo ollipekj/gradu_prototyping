@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+              http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5"
+         xmlns="http://java.sun.com/xml/ns/javaee">
+    
+    
+	<!-- Servlets for metadata transfer module-->
+	<servlet>
+		<servlet-name>allItemsServlet</servlet-name>
+		<servlet-class>transferModule.transferServices.allItemsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>allItemsServlet</servlet-name>
+		<url-pattern>/dataTransfer/transferItems</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>SingleItemServlet</servlet-name>
+		<servlet-class>transferModule.transferServices.SingleItemServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SingleItemServlet</servlet-name>
+		<url-pattern>/dataTransfer/transferSingleItem</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ChannelHandlerServlet</servlet-name>
+		<servlet-class>transferModule.transferServices.ChannelHandlerServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ChannelHandlerServlet</servlet-name>
+		<url-pattern>/dataTransfer/handleChannel</url-pattern>
+	</servlet-mapping>
+		
+
+	<!-- Servlets for Zotero client module -->
+	<servlet>
+		<servlet-name>ImportFileServlet</servlet-name>
+		<servlet-class>clientServices.ImportFileServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ImportFileServlet</servlet-name>
+		<url-pattern>/getImportFile</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>PaginationInfoServlet</servlet-name>
+		<servlet-class>clientServices.PaginationInfoServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PaginationInfoServlet</servlet-name>
+		<url-pattern>/getPaginationInfo</url-pattern>
+	</servlet-mapping>
+		
+	
+	<!-- Default page to serve -->
+	<welcome-file-list>
+		<welcome-file>zoteroClient.html</welcome-file>
+	</welcome-file-list>
+	
+		
+	<!-- Security constraints -->
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>metaDataTransfer</web-resource-name>
+			<url-pattern>/dataTransfer/metaDataTranfer.html</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>admin</role-name>
+		</auth-constraint>
+	</security-constraint>	
+
+</web-app>

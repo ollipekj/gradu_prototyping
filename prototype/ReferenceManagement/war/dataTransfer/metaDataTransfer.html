@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<link type="text/css" rel="stylesheet" href="/styles/projectStyle.css">
+<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+<title>Insert title here</title>
+<script type="text/javascript" src="/_ah/channel/jsapi"></script>
+<script type="text/javascript"
+	src="/scrapetest/scrapetest.nocache.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="transferLogic.js"></script>
+<script src="channelHandling.js"></script>
+</head>
+
+<body>
+	<div id="main_container">
+		<h1>Testing and debugging metadata transfer</h1>
+		<a href=/zoteroClient.html>Client testing</a>
+		<div id="input_container" class="grey_border content_element">
+			<h2>Data adapter interface</h2>
+				
+			<label>Authors:</label>
+			<div id="transfer_authors">
+			<table id="author_table" class="pure-table pure-table-bordered"></table>
+			</div>
+			<button class="small_margin" onclick="getAuthors()" type="button">Get author list</button>
+			<button class="small_margin" onclick="transferAllSelectedItems()"
+				type="button">Transfer publication information</button>
+			
+							
+			<div class="small_margin border_top">
+				<label>Give url to the publication detail page</label><br> 
+				<input id=single_item_field type="text" size="50"><br>
+				<div class="small_margin">
+					<button onclick="transferSingleItem()" type="button">Transfer</button>
+				</div>
+			</div>
+		</div>
+		
+		<div class="grey_border content_element">
+			<div class="">
+				<h2>Log</h2>
+				<div id=log_field class=""></div>
+			</div>
+		</div>
+	
+	</div>
+</body>
+</html>
