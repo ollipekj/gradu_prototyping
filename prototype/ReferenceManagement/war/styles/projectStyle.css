@@ -148,7 +148,7 @@ select{
 	height: auto;
 	margin: 0px;
 	padding: 5px;
-	background-color: #0078e7;
+	background-color: #4D7CA6;
 	font-weight: bold;
 	color:white;
 }
@@ -179,7 +179,7 @@ select{
 }
 
 .even_result_item{
-	background-color: #E4EEF7;
+	background-color: #F1F8FF;
 }
 
 .content_container{
