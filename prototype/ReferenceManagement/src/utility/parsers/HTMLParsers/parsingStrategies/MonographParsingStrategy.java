@@ -6,11 +6,10 @@ import org.jsoup.nodes.Document;
 
 import utility.Constants;
 import utility.DataMappings.ItemField;
-import utility.parsers.HTMLParsers.SolecrisParser;
 
-public class BookParsingStrategy  extends SolecrisParser implements ParsingStrategy {
+public class MonographParsingStrategy  extends SolecrisParser implements ParsingStrategy {
 
-	public BookParsingStrategy(Document d){
+	public MonographParsingStrategy(Document d){
 		super.doc= d;
 	}
 
@@ -30,6 +29,7 @@ public class BookParsingStrategy  extends SolecrisParser implements ParsingStrat
 		addOptionalItemField(editorKey);		
 		addOptionalItemField(jufoPubKey);	
 	}
+
 	
 	@Override
 	public Map<String, ItemField> getResults() {

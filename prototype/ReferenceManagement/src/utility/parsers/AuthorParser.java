@@ -8,10 +8,12 @@ public class AuthorParser extends ParserUtilities {
 
 	private String authors;
 	public String authorSurname;
+	private int authorCount;
 	private ArrayList<ParsedDataHolder> names;
 	private StringBuilder builder;
 	private HashMap<String, String> codes;
 	private HashMap<String, String> replaceableStrings;
+	private boolean nameIdentified;
 	
 	public AuthorParser(){
 		codes = new HashMap<String, String>();
@@ -28,11 +30,13 @@ public class AuthorParser extends ParserUtilities {
 		replaceableStrings.put("\\(eds\\.\\)", "");
 	}
 	
-	public ArrayList<ParsedDataHolder> parseAuthorString(String authorString, String name, boolean isFullCitation) {
+	public ArrayList<ParsedDataHolder> parseAuthorString(String authorString, String name, int count, boolean isFullCitation) {
 
 		authors = authorString;		
 		names = new ArrayList<ParsedDataHolder>();
 		builder = new StringBuilder();
+		authorCount = count;
+		nameIdentified = false;
 		
 		resolveAuthorSurname(name);
 		
@@ -40,11 +44,22 @@ public class AuthorParser extends ParserUtilities {
 			authors = splitNamesFromCitation(authors);
 		
 		authors = replaceCharacterCode(authors);
-		splitToAuthors();
+		splitToAuthors(authors);
 		formatNames();
 		checkForInvertedNames();
 		
 		return names;
+	}
+	
+	public boolean isRightAuthorCount(){
+		if(names.size() == authorCount)
+			return true;
+		else 
+			return false;
+	}
+	
+	public boolean isNameIdentified(){
+		return nameIdentified;
 	}
 	
 	private String splitNamesFromCitation(String citation){
@@ -82,6 +97,7 @@ public class AuthorParser extends ParserUtilities {
 			trimString(authorSurname, ',');
 		}
 		else authorSurname = null;		
+		//System.out.println(authorSurname);
 	}
 	
 	
@@ -103,8 +119,12 @@ public class AuthorParser extends ParserUtilities {
 	private void checkForInvertedNames(){
 		for(ParsedDataHolder h : names){
 			
+			if(h.getSecond().equals(authorSurname))
+				nameIdentified = true;
+			
 			if(h.getFirst().equals(authorSurname)){
 				invertNames();
+				nameIdentified = true;
 				break;
 			}
 		}
@@ -119,59 +139,99 @@ public class AuthorParser extends ParserUtilities {
 		}
 	}
 	
-	private void splitToAuthors() {
+	private void splitToAuthors(String authorString) {
 		
 		String[] aut;
-		boolean hasColon = false;
-		boolean hasSemiColon = false;
-
-		if(authors.contains(";"))
-			hasSemiColon = true;
+		String splitter = "";
 		
-		if(authors.contains(","))
-			hasColon = true;
-		
-		if(!hasSemiColon){
-			aut = authors.split(", and | & | and |,| y ");
-			splitNames(aut, " ");
+		if(!hasSemicolon(authorString)){
+			aut = authorString.split(", and | & | and |,| y ");
+			splitter = " ";
 		}
 		else{
-			aut = authors.split("; | & | and ");
-			if(hasColon)
-				splitNames(aut, ", ");
+			aut = authorString.split("; | & | and ");
+			if(hasColon(authorString))
+				splitter = ", ";
 			else
-				splitNames(aut, " ");
-		}	
+				splitter = " ";
+		}
+		if(authorCount == 1){
+			if(aut.length > 1)
+				saveItem(aut[0], aut[1]);
+		}else
+			splitNames(aut, splitter);
+	}
+	
+	private boolean hasSemicolon(String testable){
+		if(testable.contains(";"))
+			return true;
+		else 
+			return false;
+	}
+	
+	private boolean hasColon(String testable){
+		if(testable.contains(","))
+			return true;
+		else 
+			return false;
+	}
+	
+	private boolean hasSpace(String testable){
+		if(testable.contains(" "))
+			return true;
+		else 
+			return false;
+	}
+	
+	private String getSeparatorCharacter(String testable){
+		if(hasColon(testable))
+			return ",";
+		else if(hasSemicolon(testable))
+			return ";";
+		else if(hasSpace(testable))
+			return " ";
+		else 
+			return "-";
 	}
 
-	private void splitNames(String[] a, String rx){
+	private void splitNames(String[] names, String rx){
 
 		boolean noSplits = true;
 
-		for(int i=0; i<a.length; i++){
-			String var = a[i];
-			if(var.length() > 0){
-				var = trimString(var);
-				String[] temp = var.split(rx);
+		for(int i=0; i<names.length; i++){
+			String NameElement = names[i];
+			if(NameElement.length() > 0){
+				NameElement = trimString(NameElement);
+				String[] resolvedNames = NameElement.split(rx);
 
-				if(temp.length == 2){
+				if(resolvedNames.length == 1){
+					String separator = getSeparatorCharacter(resolvedNames[0]);
+					//System.out.println(temp[0] + " >"+separator+"<");
+					if(separator != "-"){
+						
+						String[] result = resolvedNames[0].split(separator);
+						//System.out.println(result.length + " >"+separator+"<");
+						splitNames(result, separator);
+					}
+				}
+				if(resolvedNames.length == 2){
 					noSplits = false;
-					saveItem(temp[0], temp[1]);
-				}else if(temp.length >= 3){
+					saveItem(resolvedNames[0], resolvedNames[1]);
+				}else if(resolvedNames.length >= 3){
 					noSplits = false;
 					builder.delete(0, builder.length());
-					for(int j=1; j<temp.length; j++){
-						builder.append(temp[j] + " ");
+					for(int j=1; j<resolvedNames.length; j++){
+						builder.append(resolvedNames[j] + " ");
 					}
-					saveItem(temp[0], builder.toString());
+					saveItem(resolvedNames[0], builder.toString());
 				}
 			}
 		}	
 		
 		if(noSplits == true){
-			for(int i=0; i<a.length; i=i+2){
-				if(a.length >= (i+2)){
-					saveItem(a[i], a[i+1]);
+			for(int i=0; i<names.length; i=i+2){
+				if(names.length >= (i+2)){
+					saveItem(names[i], names[i+1]);
 				}
 			}
 		}

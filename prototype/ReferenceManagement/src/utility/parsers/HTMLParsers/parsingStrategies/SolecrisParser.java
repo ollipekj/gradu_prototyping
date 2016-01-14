@@ -1,9 +1,10 @@
-package utility.parsers.HTMLParsers;
+package utility.parsers.HTMLParsers.parsingStrategies;
 
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -33,7 +34,7 @@ public class SolecrisParser {
 			mappings.itemFields.get(key).setValue(value);
 	}
 	
-	protected void setNewItem(String key){
+	protected void includeOptionalItem(String key){
 		
 		ItemField newItem = DataMappings.optionalFields.get(key);
 		mappings.itemFields.put(key, newItem);
@@ -43,6 +44,7 @@ public class SolecrisParser {
 		resolveDefaultItemFields();
 		resolveType(type);
 		resolveURL();
+		resolveLanguage();
 		//resolveUnwantedDefaultValues();
 	}
 	
@@ -63,33 +65,13 @@ public class SolecrisParser {
 			return false;		
 		}
 		else{
-			log.log(Level.INFO, testable + " is not " + Constants.EX_JUFO + " or " + Constants.EX_SERIES);		
 			return true;
-		}
-	}
-	
-	protected void resolveUnwantedDefaultValues(){
-		excludeDefaultValue(Constants.EX_JUFO, Constants.JUFO_EDITOR);
-		excludeDefaultValue(Constants.EX_SERIES, Constants.SERIES);
-	}
-	
-	private void excludeDefaultValue(String exclude, String key){
-
-		if(mappings.itemFields.containsKey(key)){
-			String name = mappings.itemFields.get(key).getSoleType();
-			String value = getValueByElementName(name);
-			
-			if(value.equals(exclude)){
-				log.log(Level.INFO, "For exclusion:  " + value);	
-				value = "";
-			}			
-			saveData(key, value);	
 		}
 	}
 	
 	protected void addOptionalItemField(String key){
 		ItemField item = DataMappings.optionalFields.get(key);	
-		setNewItem(key);
+		includeOptionalItem(key);
 		resolveAttribute(key, item.getSoleType());
 	}
 	
@@ -101,7 +83,7 @@ public class SolecrisParser {
 		String foundURL = "";
 		String key = Constants.URL;
 		
-		setNewItem(key);
+		includeOptionalItem(key);
 		
 		if(URLCandidates.size() > 0){
 			urlElement = URLCandidates.first();	
@@ -109,17 +91,26 @@ public class SolecrisParser {
 		}
 		saveData(key, foundURL);
 	}
+	
+	protected void resolveLanguage(){
+		
+		String key = Constants.LANGUAGE;		
+		includeOptionalItem(key);
+
+        String name = DataMappings.optionalFields.get(Constants.LANGUAGE).getSoleType();
+		name = "input[name=" + name + "]";
+		try{
+			Element els = doc.select(name).first().parent();
+			String language = els.text();
+
+			saveData(key, language);
+		}catch(NullPointerException e){}
+	}
 
 	public void resolveType(String typeKey){
 		
-//		String typeIdentifier = mappings.itemFields.get(Constants.TYPE).getSoleType();
-//		Element e = doc.select(createNameString(typeIdentifier)).first();
-//					
-		int key = Integer.parseInt(typeKey);
-		String type = DataMappings.solecrisTypes.get(key);
-		
-		if(type != null)
-			saveData(Constants.TYPE, type);
+		if(typeKey != null)
+			saveData(Constants.TYPE, typeKey);
 	}
 	
 	private String getValueByElementName(String name){

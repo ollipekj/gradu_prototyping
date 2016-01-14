@@ -6,7 +6,6 @@ import org.jsoup.nodes.Document;
 
 import utility.Constants;
 import utility.DataMappings.ItemField;
-import utility.parsers.HTMLParsers.SolecrisParser;
 
 public class ConferencePaperParsingStrategy extends SolecrisParser implements ParsingStrategy {
 

@@ -1,0 +1,41 @@
+
+h2{
+	margin: 2px 5px;
+}
+
+#transfer_options_container{
+	padding-bottom: 1em;	
+}
+
+#log_container{
+	margin-top: 1em;
+	padding: 0.5em 0em 0.5em 0.5em;
+}
+
+#log_field{
+	max-height: 400px;
+	overflow-y: scroll;
+}
+
+#author_table_holder{
+	border:2px solid #ccc;
+	width:500px; 
+	height: 300px; 
+	overflow-y: scroll;
+}
+
+#author_table{
+	width: 100%;
+}
+
+#single_item_options{
+	padding-bottom: 1em;
+}
+
+#collection_init_options{
+	padding-top: 1em;
+}
+
+#input_container {
+	padding: 5px;
+}

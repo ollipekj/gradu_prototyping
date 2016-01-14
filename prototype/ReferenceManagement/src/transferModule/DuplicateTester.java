@@ -1,8 +1,9 @@
-package utility;
+package transferModule;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import utility.URLFetcher;
 import utility.parsers.JSONparser;
 
 public class DuplicateTester {
@@ -19,6 +20,7 @@ public class DuplicateTester {
 		isNewItem = false;
 		int counter = 0;
 		String similiarItems = getDuplicateCandidates(searchAddress);
+		log.log(Level.INFO, "duplicate search" + searchAddress);
 		counter = parser.getArrayLength(similiarItems);
 		
 		if(counter == 0)
@@ -27,15 +29,17 @@ public class DuplicateTester {
 			duplicate = parser.getValueFromArray(similiarItems, 0);
 			//int version = parser.getIntValue(existingItem, "version");
 	        log.log(Level.INFO, "existingItem = " + duplicate);
-			itemKey = parser.getStringValue(duplicate, "key");
-			log.log(Level.INFO, "itemKey = " + itemKey);
-			duplicate = parser.addDataToArray(duplicate, "data", "collections", authorKey);
+	        if(duplicate != null){
+	        	itemKey = parser.getStringValue(duplicate, "key");
+	        	log.log(Level.INFO, "itemKey = " + itemKey);
+	        	duplicate = parser.addDataToArray(duplicate, "data", "collections", authorKey);
 			
 			// App engine doesn't support "PATCH" http method
 //			collectionUpdate = parser.getCollectionsFromDataField(existingItem, "collections");
 //			collectionUpdate = parser.addKeyValuePairToObject(collectionUpdate, "version", version);
 //			collectionUpdate = parser.addKeyValuePairToObject(collectionUpdate, "key", itemKey);
 //			log.log(Level.INFO, "updateString = " + collectionUpdate);
+			}
 		}
 	}
 	

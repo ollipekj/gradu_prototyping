@@ -93,6 +93,11 @@ public class ParserUtilities {
 			return this.second;
 		}
 		
+		@Override
+		public String toString(){
+			return first + ", " + second;
+		}
+		
 	}
 
 }

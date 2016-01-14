@@ -6,11 +6,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import utility.parsers.JSONparser;
 
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.channel.ChannelService;
@@ -19,6 +22,7 @@ import com.google.appengine.api.urlfetch.HTTPMethod;
 
 public class URLFetcher {
 	
+	private JSONparser parser = new JSONparser();
 	private String result = "";
 	private Map<String, List<String>> headers = null;
 	private static final Logger log  = Logger.getLogger(URLFetcher.class.getName());
@@ -58,16 +62,19 @@ public class URLFetcher {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (RuntimeException e){
+			e.printStackTrace();
 		}
 		
 		if(!success)
 			result = "error";
 	}
 	
-	public int sendMetadata(String address, String data, HTTPMethod method){
+	public TransferStatus sendMetadata(String address, String data, HTTPMethod method){
 		
 		URL url;
-		int code = 1;
+		TransferStatus status = new TransferStatus();
+		status.setResponseCode(1);
 
 		try {
 			url = new URL(address);
@@ -85,15 +92,33 @@ public class URLFetcher {
 			writer.write(data);
 			writer.close();
 
-			code = connection.getResponseCode();
-
+			int code = connection.getResponseCode();		
+			status.setResponseCode(code);
+			
+			if(code == 200){
+				StringBuilder responseBody = new StringBuilder();
+				InputStreamReader ipw = new InputStreamReader(connection.getInputStream(), "UTF-8");
+				int ch = ipw.read();
+				
+				while(ch != -1){
+				    char readChar = (char) ch;
+				    responseBody.append(readChar);
+				    ch = ipw.read();
+				
+				}
+				ipw.close();	
+			    String zoteroLink = parser.getLinkFromResponseBody(responseBody.toString());
+			    //log.log(Level.INFO, "Zotero link: " + responseBody.toString());
+			    status.setZoteLink(zoteroLink);
+			}
+			
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		return code;
+		return status;
 	}
 
 	public String getResult(){

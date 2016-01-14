@@ -8,11 +8,10 @@ import org.jsoup.select.Elements;
 
 import utility.Constants;
 import utility.DataMappings.ItemField;
-import utility.parsers.HTMLParsers.SolecrisParser;
 
-public class MagazineParsingStrategy extends SolecrisParser implements ParsingStrategy {
+public class JournalParsingStrategy extends SolecrisParser implements ParsingStrategy {
 
-	public MagazineParsingStrategy(Document d){
+	public JournalParsingStrategy(Document d){
 		super.doc= d;
 	}
 	
@@ -30,7 +29,7 @@ public class MagazineParsingStrategy extends SolecrisParser implements ParsingSt
 			String link = e.attr("href");
 			if(link.toLowerCase().contains("cris_lehti".toLowerCase())){
 				String key = Constants.MAGAZINE_TITLE;
-				setNewItem(key);
+				includeOptionalItem(key);
 				saveData(key, e.text());
 				//log.log(Level.INFO, "Saved magazine:  " + e.text());	
 			}
@@ -41,4 +40,5 @@ public class MagazineParsingStrategy extends SolecrisParser implements ParsingSt
 	public Map<String, ItemField> getResults() {
 		return mappings.itemFields;
 	}
+
 }

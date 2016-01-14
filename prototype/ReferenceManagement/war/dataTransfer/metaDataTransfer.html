@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<link type="text/css" rel="stylesheet" href="/styles/projectStyle.css">
+<link type="text/css" rel="stylesheet" href="/styles/transferStyle.css">
+<link type="text/css" rel="stylesheet" href="/styles/general.css">
 <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
 <title>Insert title here</title>
 <script type="text/javascript" src="/_ah/channel/jsapi"></script>
@@ -15,36 +16,63 @@
 
 <body>
 	<div id="main_container">
-		<h1>Testing and debugging metadata transfer</h1>
-		<a href=/zoteroClient.html>Client testing</a>
 		<div id="input_container" class="grey_border content_element">
-			<h2>Data adapter interface</h2>
-				
-			<label>Authors:</label>
-			<div id="transfer_authors">
-			<table id="author_table" class="pure-table pure-table-bordered"></table>
+
+			<div id="transfer_options_container">
+				<h2>Data adapter interface</h2>
+
+				<div id="author_table_holder">
+					<table id="author_table" class="pure-table pure-table-bordered"></table>
+				</div>
+
+				<button class="small_margin pure-button pure-button-primary"
+					onclick="getAuthors()" type="button">Get author list</button>
+				<button class="small_margin pure-button pure-button-primary"
+					onclick="transferAllSelectedItems()" type="button">Transfer
+					publication information</button>
 			</div>
-			<button class="small_margin" onclick="getAuthors()" type="button">Get author list</button>
-			<button class="small_margin" onclick="transferAllSelectedItems()"
-				type="button">Transfer publication information</button>
 			
-							
-			<div class="small_margin border_top">
-				<label>Give url to the publication detail page</label><br> 
-				<input id=single_item_field type="text" size="50"><br>
-				<div class="small_margin">
-					<button onclick="transferSingleItem()" type="button">Transfer</button>
+			<div class="border_top"><a onclick="toggleElement(this)"><label id="">Modification options</label></a>							
+				<div id="collection_init_options" class="hide">
+					<form class="pure-form pure-form-aligned">
+
+						<div class="pure-control-group"">
+							<button class="pure-button pure-button-primary"
+								onclick="createCollections()" type="button">Init
+								collections</button>
+
+							<button class="pure-button pure-button-primary"
+								onclick="deleteCollections()" type="button">Delete
+								collections</button>
+						</div>
+
+					</form>
 				</div>
 			</div>
-		</div>
-		
-		<div class="grey_border content_element">
-			<div class="">
-				<h2>Log</h2>
-				<div id=log_field class=""></div>
+			
+			<div class="border_top"><a onclick="toggleElement(this)"><label id="">Single item transfer options</label></a>
+				<div id="single_item_options" class="hide">
+					<form class="pure-form pure-form-stacked">
+
+						<label>Give url to the publication detail page</label> <input
+							id=single_item_field type="text" size="50">
+
+						<button class="pure-button pure-button-primary"
+							onclick="transferSingleItem()" type="button">Transfer</button>
+
+					</form>
+				</div>
 			</div>
-		</div>
+
+
 	
+	</div>
+
+		<div id="log_container" class="content_element grey_border">
+			<h2>Log</h2>
+			<div id=log_field class="border_top"></div>
+		</div>
+
 	</div>
 </body>
 </html>

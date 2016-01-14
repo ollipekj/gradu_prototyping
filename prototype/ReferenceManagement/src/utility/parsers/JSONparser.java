@@ -16,66 +16,35 @@ import utility.parsers.ParserUtilities.ParsedDataHolder;
 public class JSONparser {
 
 	JSONObject jsonObject;
-	JSONObject jsonTemplate;
-
 	private static final Logger log  = Logger.getLogger(JSONparser.class.getName());
 	
-	public JSONparser(){}
-
-	public String enterValues(String template, String authorKey, Map<String, ItemField> values, ArrayList<ParsedDataHolder> authors){
-
-		try {
-			template = addDataToArray(template, "", "collections", authorKey);
-			jsonTemplate = new JSONObject(template);
-
-			for(Entry<String, ItemField> entry : values.entrySet())
-			{
-				String key = entry.getValue().getZoteroType();
-				String value =  entry.getValue().getValue();
-				//log.log(Level.INFO, "key: " + key + ", value: " + value);
-				switch(key){
-				case "creators":
-					jsonTemplate.put(key , authorsToJson(authors));
-					break;
-				case "DOI": // Data might have doi but not url defined. Url is generated from doi just in case
-					//log.log(Level.INFO, "Creating url from doi");
-					if(value.length() > 3){ //Doi field might include characters such as '-' to indicate no DOI
-						enterValueToTemplate("url", createDOIUrl(value));
-						enterValueToTemplate(key, value);
-					}
-					break;
-				default:
-					enterValueToTemplate(key, value);
-				}
-
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-			return "error";
-		}		
-		return "[" + jsonTemplate.toString() + "]";
-	}
+	public JSONparser(){}	
 	
-	private void enterValueToTemplate(String key, String value){
+	public String enterValueToTemplate(String jsonTemplate, String key, String value){
 
-		if(jsonTemplate.has(key)){
-			try {
-				if(value != "" && value != null)
-					jsonTemplate.put(key, value);	
-			} catch (JSONException e) {
-				log.log(Level.INFO, "Error while entering a value to template");
-				e.printStackTrace();
+		JSONObject templt;
+		
+		try {
+			templt = new JSONObject(jsonTemplate);
+			if(templt.has(key)){
+				//log.log(Level.INFO, "saving to key: " + key + ", value: " + value);				
+				if(value != "" && value != null){
+					templt.put(key, value);	
+					jsonTemplate = templt.toString();
+				}				
 			}
+		} catch (JSONException e1) {
+			//e1.printStackTrace();
+			log.log(Level.WARNING, "Error while entering a value to template");
 		}
-			//log.log(Level.INFO, "key: " + key + " not found in template");
+		return jsonTemplate;			
 	}
 	
 	public String addDataToArray(String jsonString, String parentObject, String arrayKey, String value){
 		
 		JSONObject json;
 		
-		try {
-			log.log(Level.INFO, "adding data: " + jsonString);
+		try {			
 			json = new JSONObject(jsonString);
 			JSONArray subArray;
 			
@@ -108,7 +77,23 @@ public class JSONparser {
 		return json.toString();
 	}
 	
-	private String createDOIUrl(String doi){
+	public String addArrayToObject(String jsonString, String key, String value){
+		JSONObject json = null;
+		JSONArray tempArray = null;
+		
+		try {
+			json = new JSONObject(jsonString);
+			tempArray = new JSONArray(value);
+			json.put(key, tempArray);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return json.toString();
+	}
+	
+	public String createDOIUrl(String doi){
 		
 		if(doi.length() > 0){
 			return "http://dx.doi.org/" + doi;
@@ -138,12 +123,14 @@ public class JSONparser {
 			result = jsonObject.get(key).toString();
 		} catch (JSONException e) {
 			e.printStackTrace();
+		} catch(NullPointerException ne){
+			ne.printStackTrace();
 		}
 		return result;
 	}
 	
 	public int getArrayLength(String jsonString){
-		
+		//log.log(Level.INFO, "Array length string: " + jsonString);
 		int l = -1;
 		JSONArray jsonArray;
 		try {
@@ -168,41 +155,27 @@ public class JSONparser {
 			json = new JSONObject();
 			json.put(arrayKey, subArray);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		return json.toString();
 	}
 	
-//	public String addKeyValuePairToObject(String jsonString, String key, String value){
-//		
-//		JSONObject json = null;
-//		
-//		try {
-//			json = new JSONObject(jsonString);
-//			json.put(key, value);
-//		} catch (JSONException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return json.toString();
-//	}
-//	
-//	public String addKeyValuePairToObject(String jsonString, String key, int value){
-//		
-//		JSONObject json = null;
-//		
-//		try {
-//			json = new JSONObject(jsonString);
-//			json.put(key, value);
-//		} catch (JSONException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return json.toString();
-//	}
-//	
+	public String getStringFromDataField(String jsonString, String itemKey){
+		
+		JSONObject json = null;	
+		String result = null;
+		
+		try {
+			json = new JSONObject(jsonString);
+			JSONObject data = json.getJSONObject("data");
+			result = data.getString(itemKey);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+		
 	public String getStringValue(String jsonString, String key){
 				
 		String result = null;
@@ -227,6 +200,50 @@ public class JSONparser {
 			e.printStackTrace();
 		}
 		return result;
+	}
+	
+	public String getLinkFromResponseBody(String body){
+		
+		String result = "";
+		try{
+		String temp = getObjectByKey(body, "successful");
+		temp = getObjectByKey(temp, "0");
+		temp = getObjectByKey(temp, "links");
+		temp = getObjectByKey(temp, "alternate");
+		result = getStringValue(temp, "href");
+		}catch(NullPointerException e){
+			result = null;
+		}
+		return result;
+	}
+	
+	public String getCollectionCreationString(String name, String parent){
+		
+		String result = null;
+		
+		try {
+			jsonObject = new JSONObject();
+			jsonObject.put("name", name.toString());
+			jsonObject.put("parentCollection", parent.toString());
+			result = "[" + jsonObject.toString() + "]";
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return result;		
+	}
+	
+	public String getArrayFromObject(String jsonString, String arrayKey){
+		//log.log(Level.INFO, jsonString);
+		String result = null;
+				
+		try {
+			jsonObject = new JSONObject(jsonString);
+			result = jsonObject.getJSONArray(arrayKey).toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return result;		
+		
 	}
 	
 	public String getValueFromArray(String jsonString, int index){
@@ -286,7 +303,7 @@ public class JSONparser {
 		return jsonObject.toString();		
 	}
 	
-	private JSONArray authorsToJson(ArrayList<ParsedDataHolder> authors){
+	public String authorsToJson(ArrayList<ParsedDataHolder> authors){
 		
 		JSONObject entry;
 		JSONArray result = new JSONArray();
@@ -302,7 +319,8 @@ public class JSONparser {
 				e.printStackTrace();
 			}
 		}		
-		return result;
+	
+		return result.toString();
 	}
 	
 	public String linkHeadersToJSON(ArrayList<ParsedDataHolder> links){

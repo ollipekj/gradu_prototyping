@@ -5,7 +5,6 @@ import java.util.Map;
 import org.jsoup.nodes.Document;
 
 import utility.DataMappings.ItemField;
-import utility.parsers.HTMLParsers.SolecrisParser;
 
 public class DefaultParsingStrategy extends SolecrisParser implements ParsingStrategy {
 
@@ -20,6 +19,7 @@ public class DefaultParsingStrategy extends SolecrisParser implements ParsingStr
 	}
 	
 	private void resolveOptionalFields(){}
+	
 
 	@Override
 	public Map<String, ItemField> getResults() {

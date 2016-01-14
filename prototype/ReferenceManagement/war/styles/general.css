@@ -1,0 +1,53 @@
+.grey_border {
+	border-style: solid;
+	border-width: 1px;
+	border-color: grey;
+	border-collapse: collapse;
+}
+
+.content_element{
+/* 	display: block; */
+	background-color: white;
+/* 	margin-top: 3px; */
+}
+
+.hide{
+	display: none !important;
+}
+
+.float_label_right{
+	float: right;
+}
+
+.float_label_left{
+	float: left;
+}
+
+.inner_content{
+	padding: 5px;	
+}
+
+.height_auto{	
+	height: auto !important;
+	padding: 4px !important;
+}
+
+.text_center{
+	text-align: center;
+}
+
+.no_space{
+	letter-spacing: inherit !important;
+}
+
+.border_top{
+	border-top: 1px solid grey; 
+}
+
+.border_top_dotted{
+	border-top: 1px solid grey; 
+}
+
+.small_margin{
+	margin: 5px 0px; 
+}

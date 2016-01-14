@@ -9,12 +9,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import transferModule.MetadataTransferModule;
+import utility.TransferStatus;
 import utility.parsers.JSONparser;
 
 public class SingleItemServlet extends HttpServlet {
 	
 	String returnMessage = "";
 	int returnCode = 0;
+	String authorParsingStatus = "";
 	String url = null;
 	String authorKey = null;
 	String authorName = null;
@@ -35,7 +37,9 @@ public class SingleItemServlet extends HttpServlet {
         
         if(url != null && url != "" && authorKey != null && authorName != null){    
         	transferer.setAuthorKey(authorKey);
-        	returnCode = transferer.transferData(url, null, authorName);
+        	TransferStatus status = transferer.transferData(url, null, authorName);
+        	returnCode = status.getResponseCode();
+        	authorParsingStatus = status.getAuthorParsingStatus();
            	returnMessage = jsonHandler.stringsToJson("status", Integer.toString(returnCode));
         }else
         	returnMessage = jsonHandler.stringsToJson("status", "Error resolving url");

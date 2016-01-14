@@ -10,18 +10,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import transferModule.MetadataTransferModule;
+import utility.ResponseFormatter;
+import utility.TransferStatus;
 import utility.URLFetcher;
+import utility.ZoteroURLBuilder;
 import utility.parsers.JSONparser;
 import utility.parsers.PublistParser;
 import utility.parsers.UtilityParser;
-import utility.parsers.XMLparser;
-import utility.parsers.ZoteroURLBuilder;
 import utility.parsers.ParserUtilities.ParsedDataHolder;
 
 public class allItemsServlet extends HttpServlet {
 	
 	private int incompleteLinks;
 	private UtilityParser pubListParser;
+	private ResponseFormatter responseFormatter;
 	private JSONparser jsonParser;
 	private ZoteroURLBuilder zapi;
 	private ArrayList<ParsedDataHolder> items;
@@ -36,6 +38,7 @@ public class allItemsServlet extends HttpServlet {
 		String data = req.getParameter("items");
 		
 		pubListParser = new PublistParser();
+		responseFormatter = new ResponseFormatter();
 		jsonParser = new JSONparser();
 		zapi = new ZoteroURLBuilder();
 		transferer = new MetadataTransferModule();
@@ -58,10 +61,10 @@ public class allItemsServlet extends HttpServlet {
 				authorKey = jsonParser.getStringValue(tempObject, "authorKey");
 				authorName = jsonParser.getStringValue(tempObject, "authorName");
 				xmlFileUrl = zapi.getXmlFileUrl(authorKey);
-				xmlFileUrl = getValue(xmlFileUrl, "data", "name");
-				//log.log(Level.INFO, xmlFileUrl);
+				xmlFileUrl = resolvePubListURL(xmlFileUrl);
+				log.log(Level.INFO, xmlFileUrl);
 				
-				fetcher.sendStatusUpdate("Starting data transfer for " + authorName);
+				fetcher.sendStatusUpdate("<br>Starting data transfer for " + authorName);
 				if(xmlFileUrl != null){					
 					transferer.setAuthorKey(authorKey);
 					getItems(xmlFileUrl);
@@ -86,16 +89,35 @@ public class allItemsServlet extends HttpServlet {
 //		return Integer.parseInt(getValue(url, "meta", "numItems"));
 //	}
 	
-	private String getValue(String url, String parent, String child){
+	private String resolvePubListURL(String url){
 		
+		String result = null;
 		fetcher.fetch(url);
 		String data = fetcher.getResult();
-		log.log(Level.INFO, data);
+		int length = jsonParser.getArrayLength(data);
+		log.log(Level.INFO, "resolving publist" + data);
 		if(data != null && data.length() > 4){
-			data = jsonParser.getValueFromArray(data, 0);
-			data = jsonParser.getObjectByKey(data, parent);
-			data = jsonParser.getStringValue(data, child);	
-			return data;
+			//data = jsonParser.getValueFromArray(data, 0);
+			
+			for(int i=0; i<length; i++){
+				
+				String entry = jsonParser.getValueFromArray(data, i);
+				String name = jsonParser.getStringFromDataField(entry, "name");
+				String key = jsonParser.getStringFromDataField(entry, "key");
+								
+				if(name.equals("Metainfo")){
+					url = zapi.getXmlFileUrl(key);
+					fetcher.fetch(url);
+					result = fetcher.getResult();
+					if(result != null && result.length() > 4){
+						entry = jsonParser.getValueFromArray(result, 0);
+						result = jsonParser.getStringFromDataField(entry, "name");	
+						log.log(Level.INFO, "Data: " + data);
+					}
+				}else 
+					result = null;
+			}			
+			return result;
 		}else
 			return null;				
 	}
@@ -120,7 +142,6 @@ public class allItemsServlet extends HttpServlet {
 	
 	private void transferItems(String authorName){
 		
-		int returnCode = 0;
 		int count = 1;
 		
 		for(ParsedDataHolder item : items){
@@ -129,10 +150,15 @@ public class allItemsServlet extends HttpServlet {
 				String citation = item.getSecond();
 				
 				if(link != null){
-					returnCode = transferer.transferData(link, citation, authorName);
-					fetcher.sendStatusUpdate(count + ". Status from " + link + ": " + returnCode);
+					TransferStatus status = transferer.transferData(link, citation, authorName);
+					status.setCount(count);
+					status.setSoleLink(link);  
+					fetcher.sendStatusUpdate(responseFormatter.createHTMLFormattedResponse(status));
 				}else{
-					fetcher.sendStatusUpdate(count + ". Missing link for an article requires manual input: " + item.getSecond());
+					TransferStatus status = new TransferStatus();
+					status.setCount(count);
+					status.setCitation(item.getSecond());
+					fetcher.sendStatusUpdate(responseFormatter.createIncompleteLinkNotification(status));
 				}					
 								
 			} catch (IOException e) {

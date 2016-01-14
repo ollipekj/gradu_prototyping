@@ -32,7 +32,6 @@ public class ImportFileServlet extends HttpServlet{
 	private URLFetcher fetcher = new URLFetcher();
 	private JSONparser jsonParser = new JSONparser();
 	private LinkHeaderParser linkParser = new LinkHeaderParser();
-
 	
 	protected void doGet(HttpServletRequest req, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -45,6 +44,7 @@ public class ImportFileServlet extends HttpServlet{
 		String fileName = "publications.";
 		int arrayLength;	
 	
+		response.addHeader("Access-Control-Allow-Origin", "*");
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("text/plain");
 		resolveFileExtension(format);
@@ -54,12 +54,12 @@ public class ImportFileServlet extends HttpServlet{
 			parameterParser.parse(linkURL);
 			url = parameterParser.createFileImportURL(format);
 			response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
-			log.log(Level.INFO, "Saving data from: " + url);
+			//log.log(Level.INFO, "Saving data from: " + url);
 
 			while(hasNext == true){
 
 				result = fetchData(url);
-				log.log(Level.INFO, "From server: " + result);
+				//log.log(Level.INFO, "From server: " + result);
 				if(result != "error" && result != null){
 					arrayLength = jsonParser.getArrayLength(result);
 					
@@ -85,10 +85,9 @@ public class ImportFileServlet extends HttpServlet{
 			ParsedDataHolder linkItem = null;
 			
 			for(ParsedDataHolder holder : linkParser.parseLinks(linkHeaders)){
-				
-				if(holder.getSecond().equals("next")){
+
+				if(holder.getFirst().equals("next")){
 					linkItem = holder;
-					log.log(Level.INFO, "Found next link ");
 					break;						
 				}
 			}			
@@ -96,9 +95,33 @@ public class ImportFileServlet extends HttpServlet{
 			if(linkItem == null)
 				hasNext = false;
 			else
-				url = linkItem.getFirst();
+				url = linkItem.getSecond();
 		}					
 	}
+	
+//	private void checkForNextUrlLink(){
+//		
+//		String linkHeaders = fetcher.getHeader("link").toString();
+//		log.log(Level.INFO, linkHeaders);
+//		if(linkHeaders != null){	
+//
+//			ParsedDataHolder linkItem = null;
+//			
+//			for(ParsedDataHolder holder : linkParser.parseLinks(linkHeaders)){
+//				log.log(Level.INFO, holder.toString());
+//				if(holder.getFirst().equals("next")){
+//					linkItem = holder;
+//					log.log(Level.INFO, "Found next link ");
+//					break;						
+//				}
+//			}			
+//
+//			if(linkItem == null)
+//				hasNext = false;
+//			else
+//				url = linkItem.getSecond();
+//		}					
+//	}
 	
 	private String getWriteableValue(int index, String format){
 		entry = null;

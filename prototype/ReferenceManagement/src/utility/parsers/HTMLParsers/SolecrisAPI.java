@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
+
 //import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,11 +14,8 @@ import org.jsoup.nodes.Element;
 import utility.Constants;
 import utility.DataMappings;
 import utility.DataMappings.ItemField;
-import utility.parsers.HTMLParsers.parsingStrategies.BookParsingStrategy;
-import utility.parsers.HTMLParsers.parsingStrategies.ConferencePaperParsingStrategy;
-import utility.parsers.HTMLParsers.parsingStrategies.DefaultParsingStrategy;
-import utility.parsers.HTMLParsers.parsingStrategies.MagazineParsingStrategy;
-import utility.parsers.HTMLParsers.parsingStrategies.ParsingStrategy;
+import utility.parsers.HTMLParsers.parsingStrategies.*;
+
 
 public class SolecrisAPI {
 	
@@ -42,45 +40,60 @@ public class SolecrisAPI {
 		return getParsedData().get(name).getValue();
 	}
 	
-	public int getType(){
-		return Integer.parseInt(typeValue);
+	public String getType(){
+		if(typeValue != null)
+			return DataMappings.solecrisTypes.get(Integer.parseInt(typeValue));
+		else
+			return null;
 	}
 	
 	private boolean isOfType(String value){
-		log.log(Level.INFO, "Value: " + value + ", TypeValue: " + typeValue);
-		if(value.length() == 0)
-			return false;
+		//log.log(Level.INFO, "Value: " + value + ", TypeValue: " + typeValue);
+		String typeString = DataMappings.solecrisTypes.get(Integer.parseInt(typeValue));
 		
-		if(DataMappings.solecrisTypes.get(Integer.parseInt(typeValue)).equals(value))
-			return true;
-		else
+		if(typeString != null){
+			if(typeString.equals(value))
+				return true;
+			else
+				return false;
+		}else 
 			return false;
 	}
+	
+	private void resolveTypeValue(String typeID){
+		
+		Element type = doc.select(createNameString(typeID)).first();
+		
+		if(type != null)
+			typeValue = type.attr("value");
+		else
+			typeValue = null;
+	} 
 	
 	public void parseHTML(String html){
 		
 		doc = Jsoup.parse(html);
-		Element type = doc.select(createNameString(mappings.itemFields.get(Constants.TYPE).getSoleType())).first();
-		typeValue = type.attr("value");
-
-		if(typeValue.length() == 0){
-			type = doc.select(createNameString(mappings.itemFields.get(Constants.OPTIONAL_TYPE).getSoleType())).first();
-			typeValue = type.attr("value");
-		}		
-		log.log(Level.INFO, "Type element: " + type.toString());
+		resolveTypeValue(mappings.itemFields.get(Constants.TYPE).getSoleType());
+		
+		if(typeValue == null || typeValue == "")
+			resolveTypeValue(DataMappings.optionalFields.get(Constants.OPTIONAL_TYPE).getSoleType());		
+		
+		//log.log(Level.INFO, "Type element: " + typeValue);
 				
-		if(typeValue.length() != 0 && typeValue != null){
+		if(typeValue != null && typeValue.length() != 0){
 
-			if(isOfType(Constants.MAGAZINE_ARTICLE) || isOfType(Constants.JOURNAL_ARTICLE)){		
-				parser = new MagazineParsingStrategy(doc);
+			if(isOfType(Constants.JOURNAL_ARTICLE)){		
+				parser = new JournalParsingStrategy(doc);
 			}else if(isOfType(Constants.BOOK) || isOfType(Constants.BOOK_SECTION)){
-				parser = new BookParsingStrategy(doc);
+				parser = new MonographParsingStrategy(doc);
 			}else if(isOfType(Constants.CONFERENCE_PAPER)){
 				parser = new ConferencePaperParsingStrategy(doc);
+			}else if(isOfType(Constants.THESIS)){
+				parser = new ThesisPaperParsingStrategy(doc);
 			}else
 				parser = new DefaultParsingStrategy(doc);				
 
-			parser.parse(typeValue);
+			parser.parse(DataMappings.solecrisTypes.get(Integer.parseInt(typeValue)));
 
 		}else
 			typeValue = null;

@@ -8,10 +8,21 @@ var groupId = "/groups/318216";
 var versionAndKey = "&v=3&key=iXaNMci2uegaU9CFD1Iw2CHu";
 var publicData = new Object();
 var publicationLinks = new Object();
+var sortArray = [];
 
 $(document).ready(function(){ 
 	
 });
+
+function toggleElement(element){
+	
+	if($(element).next().hasClass("hide"))
+		$(element).next().removeClass("hide");
+	else
+		$(element).next().addClass("hide");
+
+	
+}
 
 function transferPublications(items){
 	
@@ -26,22 +37,68 @@ function transferPublications(items){
 	});;
 }
 
+function createCollections(){
+	
+	var data = {items:JSON.stringify(getCheckedNames())};
+
+	getAjax("createCollections", "POST", data, "json")
+	.done(function(data){
+		statusSuccess(fileUrl);
+		$("#log_field").append(JSONStringify(data));
+
+	}).fail(function(){
+		$("#info_box").append("Request failed.");
+	});;
+}
+
+function deleteCollections(){
+	
+	var data = {items:JSON.stringify(getCheckedNames())};
+	alert(JSON.stringify(data));
+	getAjax("createCollections", "PUT", data, "json")
+	.done(function(data){
+		statusSuccess(fileUrl);
+		$("#log_field").append(JSONStringify(data));
+
+	}).fail(function(){
+		$("#info_box").append("Request failed.");
+	});;
+}
+
+function sortAuthors(data){
+	
+	for(var d in data){
+		var key =  data[d].key;
+		var name = data[d]["data"].name;
+		var itemCount = data[d]["meta"].numItems;
+		sortArray.push({key:key, name:name, itemCount:itemCount});
+	}
+	//alert(JSON.stringify(sortArray[0][]));
+	sortArray.sort(function(a, b){
+		var tempA=a.name.toLowerCase(), tempB=b.name.toLowerCase();
+		if (tempA < tempB)
+			return -1;
+		if (tempA > tempB)
+			return 1;
+		return 0;
+	});
+}
+
 function getAuthors(){
 	
-	var url = baseURL + groupId + "/collections/UIP7RBD8/collections?format=json" + versionAndKey;
+	var url = baseURL + groupId + "/collections/UIP7RBD8/collections?format=json&limit=100" + versionAndKey;
 	getAjax(url, "GET", "", "")
 	.done(function(data){
 		$("#author_table").empty();
 		$("#author_table").append("<thead><tr><th><input type=checkbox id=select_all></th><th>Name</th><th>Items</th></tr></thead>");
-		statusSuccess(url);
-
-		for(var d in data){
-			var key =  data[d].key;
-			var name = data[d]["data"].name;
-			var itemCount = data[d]["meta"].numItems;
-			$("#author_table").append("<tr><td><input type=checkbox class=checkable id=" + key +  " value=" + name + "></td>" + 
-					"<td><label class=transfer_name_label id=" + key + "label" +">" + name + "</label></td>"+
-					"<td>" + itemCount + "</td></tr>");
+		
+		statusSuccess(url);	
+		sortAuthors(data);
+		
+		for(var i=0; i<sortArray.length; i++){
+			$("#author_table").append("<tr><td><input type=checkbox class=checkable id=" + sortArray[i]["key"] +  " value=" + sortArray[i]["name"] + "></td>" + 
+					"<td><label class=transfer_name_label id=" + sortArray[i]["key"] + "label" +">" + sortArray[i]["name"] + "</label></td>"+
+					"<td>" + sortArray[i]["itemCount"] + "</td></tr>");
 		} 
 		$("#select_all").click(function(){
 			$(".checkable").prop("checked", this.checked);
