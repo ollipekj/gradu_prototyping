@@ -7,31 +7,43 @@ function ReportGenerationHandler(){
 
 	this.openInNewPage = function(){
 
-		var ok = true;
+		var target;
 
+		if($("#author_view").is(":checked")){
+			
+			if(_selectionIsValid()){
+				target = _getCheckedNames();
+				_resolveYearRange();
+				_sendReportRequest(target);
+			}
+		}else{
+			target = new Array();
+			target.push(new _checkedElement(urlBuilder.getVariableValue("projects"), ""));
+			_sendReportRequest(target);
+		}
+	}
+	
+	function _sendReportRequest(target){
+		
+		var params = urlBuilder.getReportParameters(); 
+		var servletURL = "/clientServices/getBibliography?items=" + JSON.stringify(target) + "&queryOptions=" +encodeURIComponent(params);
+
+		window.open(servletURL);
+	}
+	
+	function _selectionIsValid(){
+		
 		if($("#year_min").val() > $("#year_max").val()){
 			alert("Minimum year cannot be greater than the maximum year");
-			ok = false;
-		}
-
-		if(_getCheckedNames().length == 0){
+			return false;
+		}else if(_getCheckedNames().length == 0){
 			alert("Choose at least one author");
-			ok = false;
-		}
-
-		if($("#year_min").val() == "" || $("#year_max").val() == ""){
+			return false;
+		}else if($("#year_min").val() == "" || $("#year_max").val() == ""){
 			alert("Enter minimum and maximum years, please");
-			ok = false;
-		}
-
-		if(ok){
-			_resolveYearRange();
-			var params = urlBuilder.getReportParameters(); 
-			var authors = _getCheckedNames();
-			var servletURL = "/clientServices/getBibliography?items=" + JSON.stringify(authors) + "&queryOptions=" +encodeURIComponent(params);
-
-			window.open(servletURL);
-		}
+			return false;
+		}else
+			return true;
 	}
 
 	function _resolveYearRange(){

@@ -14,6 +14,7 @@ function URLBuilder(){
 	var _urlVariables = {
 		"authors": urlSection("/collections/", ""),
 		"item_type": urlSection("&itemType=", ""),
+		"projects": urlSection("/collections/", ""),
 		"sort_type": urlSection("&sort=", ""),
 		"search_field": urlSection("&q=", ""),
 		"sort_direction": urlSection("&direction=", ""),
@@ -35,6 +36,11 @@ function URLBuilder(){
 	this.getAuthorsURL = function(){
 		return this._baseURL + this._groupId + 
 		"/collections/UIP7RBD8/collections?format=json&limit=100" + this._versionAndKey;
+	}
+	
+	this.getProjectsURL = function(){
+		return this._baseURL + this._groupId + 
+		"/collections/RH63FXAT/collections?format=json&limit=100" + this._versionAndKey;
 	}
 
 	this.getReportParameters = function(){

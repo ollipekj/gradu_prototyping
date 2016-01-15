@@ -1,6 +1,13 @@
 
 function ResultElement(i, data){
-
+	
+	ResultElement.prototype._isEven = function(value){
+		if(value % 2 == 0)
+			return true;
+		else
+			return false;
+	}
+	
 	var container = $("<div></div>").addClass("result_list");
 	var contentContainer = $("<div></div>").addClass("content_container").attr({id: "element" + i}).append(data.bib);
 	var optionContainer = $("<form></form>").addClass("list_options pure-form pure-g");
@@ -8,7 +15,7 @@ function ResultElement(i, data){
 	var href = "";
 	var text = "";
 
-	if(!_isEven(i))
+	if(! ResultElement.prototype._isEven(i))
 		container.addClass("even_result_item");
 
 	formatOptions.append(
@@ -34,11 +41,4 @@ function ResultElement(i, data){
 	formatOptions.change(function (){
 		contentContainer.html(data[formatOptions.val()]);
 	});
-}
-
-function _isEven(value){
-	if(value % 2 == 0)
-		return true;
-	else
-		return false;
 }

@@ -33,14 +33,33 @@
 			</div>
 			<div id="query_options" class="inner_content search_element">
 
-				<div class="multiauthor_query pure-input-1">
-					<div id="export_table_container">
-						<table id="export_authors"
-							class="pure-table pure-table-bordered"></table>
+				<div class="multiauthor_query" style="padding-bottom: 10px">
+					<label for="project_view" class="pure-radio"> <input
+						id="project_view" type="radio" name="report_selector"
+						value="project_view" checked> View projects &nbsp;
+					</label> <label for="author_view" class="pure-radio"> <input
+						id="author_view" type="radio" name="report_selector"
+						value="author_view"> View authors
+					</label>
+				</div>
+
+				<div class="multiauthor_query">
+					<form class="pure-form pure-form-stacked">
+
+						<div id="project_selector_container" class="pure-control-group">
+							<label>Project name</label>
+							<select id="projects" class="height_auto pure-input-1-2 query_field">
+								<option value="">None</option>
+							</select>
+						</div>
+					</form>
+
+					<div id="export_table_container" class="pure-input-1">
+						<table id="export_authors" class="pure-table pure-table-bordered"></table>
 					</div>
 				</div>
-							
-				<form id="query_form" class="pure-form pure-form-stacked">
+				
+				<form id="query_form" class="pure-form">
 
 							<div class="pure-control-group">
 								<label>Publication type</label><select id="item_type"

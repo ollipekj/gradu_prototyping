@@ -1,16 +1,4 @@
 
-function updateExportAuthors(){
-	
-	$("#export_authors").empty();
-	$("#export_authors").append("<thead><tr><th></th><th>Name</th><th>Publications</th></tr></thead>");
-	
-	for(var i=0; i<sortedAuthors.length; i++){
-		$("#export_authors").append("<tr><td><input type=checkbox class=checkable id=" + sortedAuthors[i]["key"] +  " value=" + sortedAuthors[i]["name"] + "></td>" + 
-				"<td><label class=transfer_name_label id=" + sortedAuthors[i]["key"] + "label" +">" + sortedAuthors[i]["name"] + "</label></td>"+
-				"<td>" + sortedAuthors[i]["itemCount"] + "</td></tr>");
-	} 
-} 
-
 function toggleExportOptions(init){
 	
 	var labelText = "";
@@ -35,17 +23,11 @@ function toggleExportOptions(init){
 function toggleExportRadioButtons(value){
 	
 	var cond;
-	var legendText;
 	
-	if(value == "results"){
+	if(value == "results")
 		cond = true;
-		legendText = "Search options";
-	}else{
+	else if(value == "authors")
 		cond = false;
-		legendText = "Filters";
-	}
-	
-	$("#form_legend").html("<b>" + legendText + "</b>");
 	
 	$(".multiauthor_query").toggleClass("hide", cond);
 	$(".normal_query").toggleClass("hide", !cond);	
@@ -53,6 +35,21 @@ function toggleExportRadioButtons(value){
 	$(".query_field").toggleClass("pure-input-1-2", !cond);	
 	$("#query_form").toggleClass("pure-form-aligned", cond);	
 	$("#query_form").toggleClass("pure-form-stacked", !cond);	
+	
+	toggleReportSelectorRadioButtons($("input[name=report_selector]:checked").val());
+}
+
+function toggleReportSelectorRadioButtons(value){
+	//alert(value);
+	var projectViewChosen;
+	
+	if(value == "project_view")
+		projectViewChosen = true;
+	else if(value == "author_view")
+		projectViewChosen = false;
+	
+	$("#project_selector_container").toggleClass("hide", !projectViewChosen);
+	$("#export_table_container").toggleClass("hide", projectViewChosen);
 }
 
 function toggleResultsDisplay(show){
@@ -71,12 +68,4 @@ function changeReadyStatus(status){
 		$("#search_label").empty();
 	else if(READ_READY == BUSY_STATUS.BUSY)
 		$("#search_label").append("<i class='fa fa-spinner fa-spin fa-2x'></i>");
-}
-
-function statusFailure(u){
-	alert("A server request has failed.");
-}
-
-function busyAlert(){
-	alert("Retrieving results, please wait.");
 }

@@ -11,6 +11,7 @@ body{
 #top_header{
 	border-bottom: 1px solid lightgrey;	
 	padding: 5px;
+	margin-bottom: 7px;
 	background-color: #4D7CA6;
 	font-weight: bold;
 	color:white;

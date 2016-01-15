@@ -1,10 +1,6 @@
 package clientServices;
 
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -42,7 +38,7 @@ public class getBibliographyServlet extends HttpServlet {
 			int length = parser.getArrayLength(items);
 			String html = "<!doctype html><html><body><head>" +
 					"<meta http-equiv='content-type' content='text/html; "
-					+ "charset=UTF-8'></head><style>." + entryClass + "{font-size:11pt; line-height: 2; padding-left: 2em; text-indent:-2em;}</style></body></html>";				
+					+ "charset=UTF-8'></head><style>" + entryClass + "{font-size:11pt; line-height: 2; padding-left: 2em; text-indent:-2em;}</style></body></html>";				
 			String authorItems = "";
 			Document doc = null;
 			
@@ -53,8 +49,7 @@ public class getBibliographyServlet extends HttpServlet {
 				if(length > 0){
 					authorItems += "<h3>"+ name + "</h3>";					
 					String url = urlBuilder.getBibliographySearchURL(key, queryOptions);
-					//url = URLEncoder.encode(url, "utf-8");
-					//url="https://api.zotero.org/groups/318216/collections/SZQTP9KK/items?include=bib&style=apa&tag=2014%20%7C%7C%202015";
+
 					log.log(Level.INFO,"Search url " +  url);
 					fetcher.fetch(url);
 					String results = fetcher.getResult();
@@ -73,11 +68,6 @@ public class getBibliographyServlet extends HttpServlet {
 			}	
 			doc = Jsoup.parse(html);
 			doc.select("body").append(authorItems);
-			
-//			for(Element e : doc.select("div."+entryClass)){
-//				e.after("<br>");
-//			}
-			
 			returnMessage = doc.toString();
 			
 		}else
@@ -94,11 +84,4 @@ public class getBibliographyServlet extends HttpServlet {
 		options = options.replace("|", "%7C");
 		return options;
 	}
-//	private void getItemsBySortField(){
-//		for(int j=0; j<parser.getArrayLength(result); j++){
-//			String bibEntry = parser.getValueFromArray(result, j);
-//			bibEntry = parser.getObjectByKey(bibEntry, "bib");
-//			html += bibEntry;
-//		}				
-//	}
 }
